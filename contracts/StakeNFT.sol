@@ -10,6 +10,7 @@ import "contracts/utils/ERC20SafeTransfer.sol";
 import "contracts/utils/MagicValue.sol";
 import "contracts/interfaces/ICBOpener.sol";
 import "contracts/interfaces/INFTStake.sol";
+import "contracts/interfaces/INFTStakeDescriptor.sol";
 
 abstract contract StakeNFTStorage {
 
@@ -76,6 +77,8 @@ abstract contract StakeNFTStorage {
     // state to keep track of the amount of MadTokens deposited and collected
     // from the contract
     uint256 internal _reserveToken;
+
+    INFTStakeDescriptor public tokenDescriptor;
 }
 
 abstract contract StakeNFTBase is
@@ -720,6 +723,20 @@ abstract contract StakeNFTBase is
         return _counter;
     }
 
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override(ERC721Upgradeable)
+        returns (string memory)
+    {
+        require(_exists(tokenId));
+        return INFTStakeDescriptor(tokenDescriptor).tokenURI(this, tokenId);
+    }
+
+    // TODO should be restricted to the factory
+    function setNftStakeDescriptor(INFTStakeDescriptor descriptor) public {
+        tokenDescriptor = descriptor;
+    }
 }
 
 /// @custom:salt StakeNFT
